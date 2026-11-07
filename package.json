@@ -1,0 +1,42 @@
+{
+  "name": "varadero-taxi",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10.9.9",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10 <11"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test-booking.cjs && node scripts/test-bookings-api.cjs",
+    "e2e:api": "node scripts/e2e-api.mjs",
+    "e2e:browser": "node scripts/e2e-browser.mjs",
+    "e2e:cleanup": "node scripts/cleanup-e2e.mjs",
+    "e2e": "npm run e2e:api && npm run e2e:browser && npm run e2e:cleanup"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "framer-motion": "^13.4.0",
+    "lucide-react": "^1.47.0",
+    "next": "^15.1.0",
+    "next-intl": "^4.14.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "^0.35.4",
+    "zod": "^4.6.5",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "playwright": "1.63.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}

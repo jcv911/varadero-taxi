@@ -1,0 +1,156 @@
+name: CI
+
+# Cada push, en cualquier rama: el mismo typecheck, las mismas pruebas y el mismo build que
+# hace Railway. La idea es que un build roto se vea aquí y no en el despliegue.
+#
+# El segundo trabajo (`e2e`) es distinto y por eso vive aparte: levanta un servidor de
+# verdad y escribe en la base real (crea unas cuantas reservas de prueba y las borra al
+# terminar). Solo corre en `master` y a mano, y si faltan los secretos se omite con un
+# aviso en lugar de romper el flujo.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un push nuevo sobre la misma rama deja obsoleta la ejecución anterior: se cancela para no
+# gastar minutos en algo que ya no importa.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · tests · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # Node 22 con su npm 10: la MISMA versión que sirve Railway en producción.
+          # Sostenible porque package-lock.json está generado con npm 10 (ver `packageManager`
+          # en package.json). La primera corrida del flujo falló justo aquí, con
+          # "Missing: @swc/helpers@0.5.23 from lock file" (run 36195406959): el lock lo había
+          # escrito npm 12 y a next-intl le faltaba su entrada anidada de @swc/helpers.
+          # Si alguna vez se regenera el lock con un npm más nuevo que 10, esto se rompe otra
+          # vez: regenerar con `npx npm@10 install --package-lock-only`.
+          node-version: 22
+          cache: npm
+
+      # `ci` y no `install`: falla si package-lock.json y package.json no están de acuerdo,
+      # que es justo lo que se quiere detectar en CI. `install` los "arreglaría" en silencio.
+      - name: Instalar dependencias
+        run: npm ci
+
+      # No se pasa ninguna variable de entorno, ni un solo secreto. El build solo lee
+      # variables opcionales (ALLOW_INDEXING, NEXT_PUBLIC_SITE_URL) y las de Supabase se
+      # usan en runtime dentro de las rutas, nunca al compilar. Si algún día esto falla
+      # porque falta una variable, es un hallazgo: el código empezó a depender de ella.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Pruebas
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # Las suites e2e necesitan el servidor levantado y la base real: no son un test unitario
+  # más. Escriben reservas con nombre "PRUEBA - NO PRESTAR SERVICIO" y `e2e:cleanup` las
+  # borra por referencia y por nombre, así que la limpieza corre SIEMPRE, incluso si una
+  # suite falla a mitad.
+  e2e:
+    name: e2e (servidor local · base real)
+    needs: verify
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      E2E_BASE_URL: http://localhost:4000
+      PORT: 4000
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # Los secretos no se pueden consultar desde el `if` de un trabajo, así que la
+      # comprobación se hace en un paso y el resto se cuelga de su salida.
+      - name: ¿Están los secretos?
+        id: gate
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::warning::Faltan SUPABASE_URL y/o SUPABASE_SERVICE_ROLE_KEY: las suites e2e se omiten."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # El postinstall de Playwright baja chromium, firefox y webkit; aquí solo hace falta
+      # chromium, que se instala explícitamente en el paso siguiente.
+      - name: Instalar dependencias
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+        run: npm ci
+
+      - name: Instalar chromium de Playwright
+        if: steps.gate.outputs.ready == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        if: steps.gate.outputs.ready == 'true'
+        run: npm run build
+
+      - name: Arrancar el servidor
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          nohup npm start > /tmp/next-start.log 2>&1 &
+          echo "server_pid=$!" >> "$GITHUB_ENV"
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null "$E2E_BASE_URL/api/health"; then
+              echo "servidor listo en el intento $i"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::El servidor no respondió en 60 s"
+          cat /tmp/next-start.log
+          exit 1
+
+      # La de API va a 16 s por petición (límite de 5/min del endpoint), así que es la
+      # suite lenta: unos 4 minutos solo ella.
+      - name: Suite de API
+        if: steps.gate.outputs.ready == 'true'
+        run: npm run e2e:api
+
+      - name: Suite de navegador
+        if: steps.gate.outputs.ready == 'true'
+        run: npm run e2e:browser
+
+      - name: Limpiar las filas de prueba
+        if: always() && steps.gate.outputs.ready == 'true'
+        run: npm run e2e:cleanup
+
+      - name: Guardar los pantallazos
+        if: always() && steps.gate.outputs.ready == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-screenshots
+          path: e2e-screenshots
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Parar el servidor
+        if: always()
+        run: |
+          if [ -n "$server_pid" ]; then kill "$server_pid" 2>/dev/null || true; fi
+          tail -20 /tmp/next-start.log || true
