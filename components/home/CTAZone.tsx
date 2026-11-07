@@ -16,7 +16,7 @@ export function CTAZone() {
         <p className="max-w-md text-muted">{t("subtitle")}</p>
         <GoldButton
           onClick={scrollToBooking}
-          className="min-h-14 max-w-xs px-10 text-base"
+          className="min-h-14 max-w-xs px-10 text-[16px]"
         >
           {t("action")}
         </GoldButton>

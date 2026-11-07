@@ -61,7 +61,6 @@ export async function generateMetadata({
 
 export const viewport: Viewport = {
   viewportFit: "cover",
-  colorScheme: "dark",
 };
 
 export default async function LocaleLayout({

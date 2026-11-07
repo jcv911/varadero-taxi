@@ -33,7 +33,7 @@ export function Testimonials() {
         <h2 className="mt-3 font-display text-3xl tracking-tight text-cream sm:text-4xl">
           {t("title")}
         </h2>
-        <p className="mt-2 text-cream/80">{t("subtitle")}</p>
+        <p className="mt-2 text-muted">{t("subtitle")}</p>
       </div>
       <motion.ul
         className="mt-10 grid gap-4 sm:grid-cols-2"
@@ -63,7 +63,7 @@ export function Testimonials() {
                 <blockquote className="flex-1 text-sm leading-relaxed text-cream/90">
                   {t(`text${i}`)}
                 </blockquote>
-                <figcaption className="text-xs text-cream/70">
+                <figcaption className="text-xs text-muted">
                   <strong className="block font-medium text-cream">
                     {t(`name${i}`)}
                   </strong>
@@ -75,7 +75,7 @@ export function Testimonials() {
         ))}
       </motion.ul>
       <p
-        className="mt-6 text-center text-xs italic text-cream/50"
+        className="mt-6 text-center text-xs italic text-muted/80"
         title={t("provisional")}
       >
         {t("provisional")}

@@ -32,7 +32,7 @@ export default async function TermsPage({ params }: Props) {
         <h1 className="mb-8 font-display text-3xl tracking-tight text-cream sm:text-4xl">
           {t("title")}
         </h1>
-        <div className="space-y-4 text-sm leading-relaxed text-cream/90 sm:text-base">
+        <div className="space-y-4 text-sm leading-relaxed text-cream/90 sm:text-[16px]">
           {paragraphs.map((key) => (
             <p key={key}>{t(key)}</p>
           ))}

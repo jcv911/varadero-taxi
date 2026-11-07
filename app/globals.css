@@ -3,13 +3,14 @@
 @theme {
   --color-deep: #0b0e12;
   --color-base: #131920;
+  --color-surface: #182029;
   --color-elevated: #1c242d;
   --color-gold: #e8a94b;
   --color-gold-hover: #f6c66b;
   --color-gold-pressed: #b97a1e;
   --color-teal: #22b8cf;
   --color-cream: #f5f1ea;
-  --color-muted: #b8c0c8;
+  --color-muted: #d0d7de;
   --color-error: #e5484d;
   --color-success: #3e8e5a;
   --color-glass: rgba(28, 36, 45, 0.55);

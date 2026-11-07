@@ -117,7 +117,7 @@ export function VehicleClassSelector() {
                   <span className="text-[11px] text-muted">
                     {mode === "hours" ? t("mode_hours") : t("total")}
                   </span>
-                  <span className="text-sm font-bold tabular-nums text-gold sm:text-base">
+                  <span className="text-sm font-bold tabular-nums text-gold sm:text-[16px]">
                     {mode === "hours" ? formatUsd(v.hourlyUsd) : routeId ? formatUsd(getRoutePrice(routeId, v.id)) : t("route_not_selected")}
                     {mode === "hours" && t("per_hour")}
                   </span>
