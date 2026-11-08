@@ -126,7 +126,7 @@ async function main() {
   const r1 = await pacedPost(basePayload());
   check(r1.status === 200, "A1 reserva válida (Varadero→La Habana, sedán, mañana 10:00) -> 200", `status=${r1.status}`);
   if (r1.status === 200) {
-    check(/^VT-\d{4}$/.test(r1.json.ref ?? ""), "A1 ref con formato VT-XXXX", String(r1.json.ref));
+    check(/^VT-[2-9A-HJ-NP-Z]{6}$/.test(r1.json.ref ?? ""), "A1 ref con formato VT-XXXX", String(r1.json.ref));
     check(r1.json.priceUsd === expectedPrice, `A1 priceUsd=${r1.json.priceUsd} == computePrice(${expectedPrice})`);
     refs.push(r1.json.ref);
   }

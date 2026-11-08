@@ -96,8 +96,8 @@ async function submitAndAssertSuccess(page, label) {
   lastSubmit = Date.now();
   await page.getByRole("button", { name: "Enviar solicitud" }).click();
   await page.getByText("Solicitud recibida").waitFor({ timeout: 30000 });
-  const refText = (await page.locator("text=/VT-\\d{4}/").first().textContent().catch(() => "")) || "";
-  const match = refText.match(/VT-\d{4}/);
+  const refText = (await page.locator("text=/VT-[2-9A-HJ-NP-Z]{6}/").first().textContent().catch(() => "")) || "";
+  const match = refText.match(/VT-[2-9A-HJ-NP-Z]{6}/);
   assert(!!match, `${label}: sucesos con ref`, refText);
   correct_and_push(match[0]);
   // Acotado al widget: el pie de página tiene su propio enlace de WhatsApp desde el rediseño,
