@@ -10,11 +10,11 @@ Web de reserva de traslados privados de lujo en Varadero (Cuba). Next.js 15 + Ta
 ## Estado actual
 Pasos 1-11 funcionales y pusheados a `master` (`https://github.com/jcv911/varadero-taxi`, privado). **Producción
 verificada**: `https://varadero-taxi-production.up.railway.app` responde 200 en `/es` y `/en`, y `/api/health` 200 con
-`checks{supabase:true, telegram:false, migration003:true}` y el commit desplegado en `version.commit`.
+`checks{supabase:true, telegram:false, migration003:true (verificada el 2026-09-25 en PROGRESS.md; el health del 2026-11-07 devolvió null por timeout de la sonda)}` y el commit desplegado en `version.commit`.
 **Lo que queda no es código de la web:** (a) los **dos paneles del negocio** (abajo), (b) las **confirmaciones
 comerciales** (TODO-CONFIRMAR) y (c) el **dominio propio**, pospuesto por decisión del negocio. El historial —fixes
 móviles, calendario, endurecimiento, idempotencia, health, CI, npm 10 y prueba de estrés— está en `PROGRESS.md` con
-su evidencia; aquí no se repite. Referencia del último commit verificado en producción: `1b75245`.
+su evidencia; aquí no se repite. Referencia del último commit verificado en producción: `f4b4b78`.
 
 ## Fases
 
@@ -153,7 +153,7 @@ cada push, sin secretos.
 - RLS sin políticas anon (solo service_role inserta).
 - rate-limit serverless en memoria = por instancia (para >1 réplica: Upstash/Redis).
 - Todos los textos en dictos next-intl; TODO-CONFIRMAR marcado en código/config y listado en PROGRESS.md.
-- Trabajo hecho directamente en el repo por el agente de la sesión. No hay `AGENTS.md` en el proyecto: la referencia anterior a ese archivo era errónea y se retiró.
+- AGENTS.md define las reglas para agentes de IA, incluido el entorno Windows.
 - Deploy: Railway como servidor Node (`next start`, respeta PORT). Claves nunca en repo ni en pantalla.
 - Build con `npm run build` (el envoltorio npm local funciona con normalidad; la recomendación antigua de invocar `node_modules/.bin/next.cmd` era de una sesión con el wrapper interferido).
 

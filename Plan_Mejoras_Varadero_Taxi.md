@@ -73,17 +73,15 @@ salida pública requiere decisión del negocio y una línea de configuración:
 ### 🟡 ALTA — confianza y información comercial
 
 #### 5. Páginas legales restantes
-Existe solo `/privacidad`. Falta:
-- `/terminos` (términos y condiciones).
-- `/cancelacion` (o sección dentro de términos), tras confirmar la política en el punto 1.
-- Reescribir `/privacidad` con el texto final — imprescindible antes de indexar: el consentimiento del formulario ya enlaza a ella.
-- Servir también la versión EN (los diccionarios next-intl ya montan la estructura para privacidad).
+**Estado: HECHO (2026-11-05, commit 8f8d178)**
+- `/terminos` y `/cancelacion` creadas con texto ES/EN provisional, footer + sitemap actualizado.
+- `/privacidad` sigue provisional (ver punto 1 TODO-CONFIRMAR).
+- Versión EN servida vía next-intl.
 
 #### 6. Prueba social (testimonios)
-No hay reseñas ni testimonios en el proyecto. Punto legítimo del plan original que sigue abierto:
-- Sección en la home con 4–6 testimonios provisionales marcados como tales hasta tener reseñas verificadas
-  (Google Maps/TripAdvisor si existen).
-- La puntuación media (⭐) solo se muestra cuando exista y esté verificada.
+**Estado: HECHO (2026-11-05, commit 8f8d178)**
+- Sección de testimonios en la home con contenido de ejemplo y nota visible de provisionalidad.
+- Sustituir por reseñas verificadas cuando el negocio las entregue.
 
 #### 7. Fotos y nombres reales de la flota
 Las 4 fotos en `public/fleet/` funcionan, pero el negocio marcó «nombres y fotos reales de los vehículos» como
@@ -119,8 +117,8 @@ Ya medido y mejorado; quedan dos optimizaciones menores conocidas:
 | 2 | Panel del gestor de reservas | 🔴 Crítica | ⬜ Pendiente (plan en `task_plan.md`) |
 | 3 | Contacto ampliado (email, CTA WhatsApp escritorio, contacto) | 🔴 Crítica | ⬜ Pendiente |
 | 4 | Indexado (`ALLOW_INDEXING=true` si el negocio lo aprueba) + dominio propio | 🔴 Crítica | ⬜ Pendiente (decisión del negocio) |
-| 5 | Páginas legales: `/terminos`, cancelación, privacidad final | 🟡 Alta | ⬜ Pendiente (privacidad provisional ya existe) |
-| 6 | Testimonios / prueba social | 🟡 Alta | ⬜ Pendiente |
+| 5 | Páginas legales: `/terminos`, cancelación, privacidad final | 🟡 Alta | ✅ Hecho (terminos/cancelacion 2026-11-05, commit 8f8d178; privacidad pendiente final) |
+| 6 | Testimonios / prueba social | 🟡 Alta | ✅ Hecho (sección provisional 2026-11-05, commit 8f8d178) |
 | 7 | Fotos y nombres reales de la flota | 🟡 Alta | ⬜ Pendiente |
 | 8 | SEO restante (FAQPage, OG dedicada, revisión pre-indexado) | 🟢 Media | ⬜ Pendiente tras el #4 |
 | 9 | Rendimiento (zod en cliente, hero) | 🟢 Media | 🟨 Parcialmente hecho |
