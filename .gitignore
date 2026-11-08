@@ -39,4 +39,8 @@ scripts/.e2e-refs.json
 # artefactos de herramientas — no son del proyecto y no deben versionarse
 .freebuff/
 /brag-output-*/
-/video brag.md
+/video brag.mdnode_modules/
+.next/
+.env*.local
+.freebuff/
+supabase/.temp/
