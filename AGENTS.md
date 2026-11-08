@@ -18,3 +18,9 @@ Antes de cambiar algo, lee este archivo completo.
 ## Cuando algo falla
 - Pega el error completo y explica la causa antes de tocar código.
 - Si no sabes la causa, dilo. No inventes un arreglo.
+## Entorno de trabajo (Windows)
+
+- El sistema es Windows con PowerShell. No uses comandos de Linux (`for`, `sleep`, `jq`, `grep`, `cat` con pipes complejos).
+- La herramienta de terminal se llama `shell`. No existe una herramienta `bash`.
+- Para consultar una URL usa `Invoke-RestMethod`, una sola vez por tarea.
+- Nunca hagas bucles de espera ni reintentos automáticos. Si algo tarda, reporta el estado y espera instrucciones.
