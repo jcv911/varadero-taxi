@@ -29,8 +29,11 @@ const BOOKING_COLUMNS =
 let idempotencyColumnBackoffUntil = 0;
 
 function getClientIp(request: Request): string {
+  // El cliente puede enviar cualquier valor en x-forwarded-for. El proxy de Railway añade la
+  // IP real al FINAL de la cadena, así que se toma el último valor, no el primero.
   const fwd = request.headers.get("x-forwarded-for");
-  return fwd?.split(",")[0]?.trim() ?? "unknown";
+  const parts = fwd?.split(",").map((p) => p.trim()).filter(Boolean) ?? [];
+  return parts[parts.length - 1] ?? "unknown";
 }
 
 function isRateLimited(ip: string): boolean {
@@ -46,7 +49,16 @@ function isRateLimited(ip: string): boolean {
 }
 
 function generateRef(): string {
-  return `${config.booking.refPrefix}${Math.floor(1000 + Math.random() * 9000)}`;
+  // 6 caracteres de un alfabeto sin ambigüedades (sin 0/O, 1/I): ~1.000 millones de combinaciones.
+  const alphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  let code = "";
+  for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return `${config.booking.refPrefix}${code}`;
+}
+
+/** Escapa lo que Telegram interpreta como HTML (parse_mode "HTML"). */
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /**
@@ -112,19 +124,20 @@ function adminMessage(row: {
     trip = row.custom_destination ?? "—";
   }
 
+  const e = escapeHtml;
   return [
-    `<b>Nueva reserva ${row.ref}</b>`,
-    `Trayecto: ${trip}`,
-    `Vehículo: ${vehicle}`,
-    `Fecha/hora: ${row.date} ${row.time}`,
+    `<b>Nueva reserva ${e(row.ref)}</b>`,
+    `Trayecto: ${e(trip)}`,
+    `Vehículo: ${e(vehicle)}`,
+    `Fecha/hora: ${e(row.date)} ${e(row.time)}`,
     `Precio: ${row.price_usd} USD`,
     `${row.passengers} pax · ${row.luggage} maletas`,
-    `Punto en Varadero: ${row.hotel_pickup}`,
-    row.other_address ? `Otro punto: ${row.other_address}` : null,
-    row.flight_number ? `Vuelo: ${row.flight_number}` : null,
-    `Nombre: ${row.name}`,
-    `Tel: ${row.whatsapp}`,
-    row.notes ? `Nota: ${row.notes}` : null,
+    `Punto en Varadero: ${e(row.hotel_pickup)}`,
+    row.other_address ? `Otro punto: ${e(row.other_address)}` : null,
+    row.flight_number ? `Vuelo: ${e(row.flight_number)}` : null,
+    `Nombre: ${e(row.name)}`,
+    `Tel: ${e(row.whatsapp)}`,
+    row.notes ? `Nota: ${e(row.notes)}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -152,11 +165,7 @@ export async function POST(request: Request) {
   const ip = getClientIp(request);
   if (isRateLimited(ip)) {
     return NextResponse.json(
-      {
-        error: "rate_limited",
-        errorDetail:
-          "Rate limit based on in-memory Map. In serverless environments with multiple instances, each instance has its own counter. For production, use Redis or Upstash for distributed rate limiting.",
-      },
+      { error: "rate_limited" },
       { status: 429 }
     );
   }

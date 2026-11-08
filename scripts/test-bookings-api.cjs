@@ -160,7 +160,7 @@ async function main() {
   assert.equal(body.ref, "VT-1234");
   assert.equal(body.priceUsd, 100, "el precio lo calcula el servidor");
   assert.equal(db.inserts.length, 1);
-  assert.match(db.inserts[0].ref, /^VT-\d{4}$/);
+  assert.match(db.inserts[0].ref, /^VT-[2-9A-HJ-NP-Z]{6}$/);
   assert.equal(db.inserts[0].idempotency_key, undefined, "sin clave no se escribe la columna");
 
   // 2. Ref collision: the unique index rejects it and the handler draws again.
